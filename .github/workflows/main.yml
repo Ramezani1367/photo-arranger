@@ -1,0 +1,64 @@
+name: Photo Arranger CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Validate PWA
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python test dependencies
+        run: python -m pip install --upgrade pip playwright pypdf pillow
+
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/app.js
+          node --check js/pdf-writer.js
+          node --check js/jalali.js
+          node --check sw.js
+
+      - name: Run PDF writer test
+        run: npm test
+
+      - name: Verify generated PDF geometry
+        working-directory: test
+        run: python verify_pdf.py
+
+      - name: Start local web server
+        run: |
+          nohup python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/photo-arranger-server.log 2>&1 &
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/photo-arranger-server.log
+          exit 1
+
+      - name: Run browser end-to-end tests
+        run: python test/browser_e2e.py
