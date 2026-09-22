@@ -1,7 +1,7 @@
 {
   "appId": "com.example.photoarranger",
   "appName": "Photo Arranger",
-  "webDir": ".",
+  "webDir": "www",
   "server": {
     "androidScheme": "https"
   },
