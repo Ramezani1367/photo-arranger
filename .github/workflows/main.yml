@@ -12,19 +12,19 @@ permissions:
 jobs:
   test:
     name: Validate PWA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -50,13 +50,16 @@ jobs:
 
       - name: Start local web server
         run: |
-          nohup python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/photo-arranger-server.log 2>&1 &
+          nohup python3 -m http.server 8000 --bind 127.0.0.1 \
+            > /tmp/photo-arranger-server.log 2>&1 &
+
           for i in {1..20}; do
             if curl --fail --silent http://127.0.0.1:8000/ > /dev/null; then
               exit 0
             fi
             sleep 1
           done
+
           cat /tmp/photo-arranger-server.log
           exit 1
 
