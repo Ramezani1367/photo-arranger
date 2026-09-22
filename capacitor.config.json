@@ -1,0 +1,11 @@
+{
+  "appId": "com.example.photoarranger",
+  "appName": "Photo Arranger",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
